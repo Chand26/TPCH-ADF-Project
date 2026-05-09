@@ -1,0 +1,28 @@
+{
+	"name": "pl_validation_reddy",
+	"properties": {
+		"activities": [
+			{
+				"name": "Validation1",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_blob_reddy",
+						"type": "DatasetReference",
+						"parameters": {
+							"Folder_name": "project",
+							"File_name": "customer1.txt"
+						}
+					},
+					"timeout": "0.00:00:30",
+					"sleep": 2
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-04-26T02:33:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

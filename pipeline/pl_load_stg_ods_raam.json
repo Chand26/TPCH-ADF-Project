@@ -1,0 +1,109 @@
+{
+	"name": "pl_load_stg_ods_raam",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('Tables')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT * FROM STG.VW_', item(), '_', pipeline().parameters.name_suffix)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"preCopyScript": {
+										"value": "@concat('TRUNCATE TABLE ODS.', \n    if(equals(item(), 'NATION_REGION'), \n        concat('NATION_REGION_DETAILS_', pipeline().parameters.name_suffix), \n        concat(item(), '_', pipeline().parameters.name_suffix)))",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_target_table_raam",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_nm": "stg",
+										"table_nm": "dummy"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_target_table_raam",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_nm": "ods",
+										"table_nm": {
+											"value": "@if(equals(item(), 'NATION_REGION'), \n    concat('NATION_REGION_DETAILS_', pipeline().parameters.name_suffix), \n    concat(item(), '_', pipeline().parameters.name_suffix))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"name_suffix": {
+				"type": "string",
+				"defaultValue": "raam"
+			}
+		},
+		"variables": {
+			"Tables": {
+				"type": "Array",
+				"defaultValue": [
+					"CUSTOMER",
+					"ORDERS",
+					"PART",
+					"SUPPLIER",
+					"LINEITEM",
+					"NATION_REGION"
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-05-08T19:20:53Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

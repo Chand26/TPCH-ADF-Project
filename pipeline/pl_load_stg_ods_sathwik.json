@@ -1,0 +1,950 @@
+{
+	"name": "pl_load_stg_ods_sathwik",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\r\n    CUSTKEY,\r\n    NAME,\r\n    ADDRESS,\r\n    NATIONKEY,\r\n    PHONE,\r\n    ACCTBAL,\r\n    MKTSEGMENT,\r\n    COMMENT,\r\n    CASE\r\n        WHEN ACCTBAL > 10000 THEN 'High Value'\r\n        WHEN ACCTBAL BETWEEN 5000 AND 10000 THEN 'Medium Value'\r\n        ELSE 'Low Value'\r\n    END AS CUSTOMER_SEGMENT,\r\n    GETDATE() AS INSERT_DATE\r\nFROM STG.CUSTOMER_sathwik;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.CUSTOMER_sathwik",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "CUSTKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "CUSTKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ADDRESS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NATIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NATIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "PHONE",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "PHONE",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCTBAL",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								},
+								"sink": {
+									"name": "ACCTBAL",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "MKTSEGMENT",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "MKTSEGMENT",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "COMMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "COMMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CUSTOMER_SEGMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "CUSTOMER_SEGMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "CUSTOMER_sathwik"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data2",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\r\n    ORDERKEY,\r\n    CUSTKEY,\r\n    ORDERSTATUS,\r\n    TOTALPRICE,\r\n    ORDERDATE,\r\n    ORDERPRIORITY,\r\n    CLERK,\r\n    SHIPPRIORITY,\r\n    COMMENT,\r\n    TOTALPRICE * 0.1 AS ORDER_PROFIT, -- Assuming 10% profit margin\r\n    GETDATE() AS INSERT_DATE\r\nFROM STG.ORDERS_sathwik;\r\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.ORDERS_sathwik",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ORDERKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ORDERKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "CUSTKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "CUSTKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "ORDERSTATUS",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "ORDERSTATUS",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "TOTALPRICE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								},
+								"sink": {
+									"name": "TOTALPRICE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "ORDERDATE",
+									"type": "Date",
+									"physicalType": "date"
+								},
+								"sink": {
+									"name": "ORDERDATE",
+									"type": "Date",
+									"physicalType": "date"
+								}
+							},
+							{
+								"source": {
+									"name": "ORDERPRIORITY",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "ORDERPRIORITY",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "CLERK",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "CLERK",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPPRIORITY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "SHIPPRIORITY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "COMMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "COMMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ORDER_PROFIT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 3,
+									"precision": 17
+								},
+								"sink": {
+									"name": "ORDER_PROFIT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "ORDERS_sathwik"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data3",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\r\n    PARTKEY,\r\n    NAME,\r\n    MFGR,\r\n    BRAND,\r\n    TYPE,\r\n    SIZE,\r\n    CONTAINER,\r\n    RETAILPRICE,\r\n    COMMENT,\r\n   \r\n    0.1 AS PROFIT_MARGIN, -- Assuming a 10% profit margin\r\n    GETDATE() AS INSERT_DATE\r\nFROM STG.PART_sathwik;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.PART_sathwik",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "PART_sathwik"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data4",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data3",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\r\n    SUPPKEY,\r\n    NAME,\r\n    ADDRESS,\r\n    NATIONKEY,\r\n    PHONE,\r\n    ACCTBAL,\r\n    COMMENT,\r\n    CASE\r\n        WHEN ACCTBAL > 10000 THEN 5  -- High Rating\r\n        WHEN ACCTBAL BETWEEN 5000 AND 10000 THEN 3  -- Medium Rating\r\n        ELSE 1  -- Low Rating\r\n    END AS SUPPLIER_RATING,\r\n    GETDATE() AS INSERT_DATE\r\nFROM STG.SUPPLIER_sathwik;\r\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.SUPPLIER_sathwik",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "SUPPLIER_sathwik"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data5",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data4",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    ORDERKEY,\n    PARTKEY,\n    SUPPKEY,\n    LINENUMBER,\n    QUANTITY,\n    EXTENDEDPRICE,\n    DISCOUNT,\n    TAX,\n    RETURNFLAG,\n    LINESTATUS,\n    SHIPDATE,\n    COMMITDATE,\n    RECEIPTDATE,\n    SHIPINSTRUCT,\n    SHIPMODE,\n    COMMENT,\n    EXTENDEDPRICE * 0.1 AS PROFIT, -- Assuming a 10% profit margin\n    GETDATE() AS INSERT_DATE\nFROM STG.LINEITEM_sathwik;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.LINEITEM_sathwik",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ORDERKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ORDERKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "PARTKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "PARTKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "SUPPKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "SUPPKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "LINENUMBER",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "LINENUMBER",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "QUANTITY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "QUANTITY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "EXTENDEDPRICE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								},
+								"sink": {
+									"name": "EXTENDEDPRICE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "DISCOUNT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								},
+								"sink": {
+									"name": "DISCOUNT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "TAX",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								},
+								"sink": {
+									"name": "TAX",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "RETURNFLAG",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "RETURNFLAG",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "LINESTATUS",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "LINESTATUS",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPDATE",
+									"type": "Date",
+									"physicalType": "date"
+								},
+								"sink": {
+									"name": "SHIPDATE",
+									"type": "Date",
+									"physicalType": "date"
+								}
+							},
+							{
+								"source": {
+									"name": "COMMITDATE",
+									"type": "Date",
+									"physicalType": "date"
+								},
+								"sink": {
+									"name": "COMMITDATE",
+									"type": "Date",
+									"physicalType": "date"
+								}
+							},
+							{
+								"source": {
+									"name": "RECEIPTDATE",
+									"type": "Date",
+									"physicalType": "date"
+								},
+								"sink": {
+									"name": "RECEIPTDATE",
+									"type": "Date",
+									"physicalType": "date"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPINSTRUCT",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "SHIPINSTRUCT",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPMODE",
+									"type": "String",
+									"physicalType": "char"
+								},
+								"sink": {
+									"name": "SHIPMODE",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "COMMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "COMMENT",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PROFIT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 3,
+									"precision": 17
+								},
+								"sink": {
+									"name": "PROFIT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 15
+								}
+							},
+							{
+								"source": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "LINEITEM_sathwik"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data6",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data5",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    N.NATIONKEY,\n    N.NAME,\n    R.REGIONKEY,\n    R.NAME AS REGION_NAME,\n    GETDATE() AS INSERT_DATE\nFROM\n    STG.NATION_sathwik N\nJOIN\n   STG.REGION_sathwik R ON N.REGIONKEY = R.REGIONKEY;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.NATION_REGION_DETAILS_sathwik",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NATIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NATIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REGIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "REGIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "REGION_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "REGION_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_target_table_sathwik",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "NATION_REGION_DETAILS_sathwik"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "adf_2026"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-05-09T02:50:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

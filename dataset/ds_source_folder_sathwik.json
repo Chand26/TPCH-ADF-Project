@@ -1,0 +1,34 @@
+{
+	"name": "ds_source_folder_sathwik",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_blob_storage_sathwik",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"src_dir": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "adf2026"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": {
+					"value": "@dataset().src_dir",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,30 @@
+{
+	"name": "pl_procedure_reddappa",
+	"properties": {
+		"activities": [
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[test_reddappa]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_sqlserver_reddy",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-04-25T04:04:46Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

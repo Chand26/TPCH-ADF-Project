@@ -1,0 +1,386 @@
+{
+	"name": "pl_load_stg_ods_chandana",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    CUSTKEY,\n    NAME,\n    ADDRESS,\n    NATIONKEY,\n    PHONE,\n    ACCTBAL,\n    MKTSEGMENT,\n    COMMENT,\n    CASE\n        WHEN ACCTBAL > 10000 THEN 'High Value'\n        WHEN ACCTBAL BETWEEN 5000 AND 10000 THEN 'Medium Value'\n        ELSE 'Low Value'\n    END AS CUSTOMER_SEGMENT,\n    GETDATE() AS INSERT_DATE\nFROM STG.CUSTOMER_chandana;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.CUSTOMER_chandana",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "CUSTOMER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "CUSTOMER_chandana"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data2",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    ORDERKEY,\n    CUSTKEY,\n    ORDERSTATUS,\n    TOTALPRICE,\n    ORDERDATE,\n    ORDERPRIORITY,\n    CLERK,\n    SHIPPRIORITY,\n    COMMENT,\n    TOTALPRICE * 0.1 AS ORDER_PROFIT, -- Assuming 10% profit margin\n    GETDATE() AS INSERT_DATE\nFROM STG.ORDERS_chandana;\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.ORDERS_chandana",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "ORDERS"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "ORDERS_chandana"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data3",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    PARTKEY,\n    NAME,\n    MFGR,\n    BRAND,\n    TYPE,\n    SIZE,\n    CONTAINER,\n    RETAILPRICE,\n    COMMENT,\n   \n    0.1 AS PROFIT_MARGIN, -- Assuming a 10% profit margin\n    GETDATE() AS INSERT_DATE\nFROM STG.PART_chandana;\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.PART_chandana",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "PART"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "PART_chandana"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data4",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data3",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    SUPPKEY,\n    NAME,\n    ADDRESS,\n    NATIONKEY,\n    PHONE,\n    ACCTBAL,\n    COMMENT,\n    CASE\n        WHEN ACCTBAL > 10000 THEN 5  -- High Rating\n        WHEN ACCTBAL BETWEEN 5000 AND 10000 THEN 3  -- Medium Rating\n        ELSE 1  -- Low Rating\n    END AS SUPPLIER_RATING,\n    GETDATE() AS INSERT_DATE\nFROM STG.SUPPLIER_chandana;\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.SUPPLIER_chandana",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "SUPPLIER"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "SUPPLIER_chandana"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data5",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data4",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    ORDERKEY,\n    PARTKEY,\n    SUPPKEY,\n    LINENUMBER,\n    QUANTITY,\n    EXTENDEDPRICE,\n    DISCOUNT,\n    TAX,\n    RETURNFLAG,\n    LINESTATUS,\n    SHIPDATE,\n    COMMITDATE,\n    RECEIPTDATE,\n    SHIPINSTRUCT,\n    SHIPMODE,\n    COMMENT,\n    EXTENDEDPRICE * 0.1 AS PROFIT, -- Assuming a 10% profit margin\n    GETDATE() AS INSERT_DATE\nFROM STG.LINEITEM_chandana\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.LINEITEM_chandana",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "LINEITEM"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "LINEITEM_chandana"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data6",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data5",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\n    N.NATIONKEY,\n    N.NAME,\n    R.REGIONKEY,\n    R.NAME  AS REGION_NAME,\n    GETDATE() AS INSERT_DATE\nFROM\n    STG.NATION_chandana N\nJOIN\n   STG.REGION_chandana R ON N.REGIONKEY = R.REGIONKEY;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"preCopyScript": "DELETE FROM ODS.NATION_REGION_DETAILS_chandana",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "STG",
+							"table_nm": "NATION_REGION_DETAILS"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_raw_table_chandana",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": "ODS",
+							"table_nm": "NATION_REGION_DETAILS_chandana"
+						}
+					}
+				]
+			}
+		],
+		"variables": {
+			"Tables": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-05-09T03:01:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

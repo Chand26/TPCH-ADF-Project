@@ -1,0 +1,48 @@
+{
+	"name": "pl_df_chandana",
+	"properties": {
+		"activities": [
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow_chandana",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"sourceNation": {
+								"Folder_name": "project",
+								"File_name": "nation.txt"
+							},
+							"sourceRegion": {
+								"Folder_name": "project",
+								"File_name": "region.txt"
+							},
+							"sink1": {
+								"SCHEMA": "dbo",
+								"TABLE": "NATION_REGION_DETAILS_chandana"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-04-24T17:31:32Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

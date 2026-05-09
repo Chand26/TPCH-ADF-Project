@@ -1,0 +1,31 @@
+{
+	"name": "ds_sourcefolder_raam",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_blob_storage_raam",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"src_dir": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": {
+					"value": "@dataset().src_dir",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

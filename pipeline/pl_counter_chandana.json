@@ -1,0 +1,134 @@
+{
+	"name": "pl_counter_chandana",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('list1')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "counter",
+								"value": {
+									"value": "@add(variables('init'),1)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set variable1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "init",
+								"value": {
+									"value": "@variables('counter')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Append variable1",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "list1",
+					"value": {
+						"value": "@variables('init')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set variable3",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Append variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "list2",
+					"value": {
+						"value": "@variables('list1')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"variables": {
+			"init": {
+				"type": "Integer",
+				"defaultValue": 1
+			},
+			"counter": {
+				"type": "Integer",
+				"defaultValue": 0
+			},
+			"list1": {
+				"type": "Array",
+				"defaultValue": [
+					1,
+					2,
+					3,
+					4
+				]
+			},
+			"list2": {
+				"type": "Array",
+				"defaultValue": []
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-04-26T02:16:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

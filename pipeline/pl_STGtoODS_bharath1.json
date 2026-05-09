@@ -1,0 +1,52 @@
+{
+	"name": "pl_STGtoODS_bharath1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_raw_table_bharath",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_nm": {
+								"value": "@pipeline().parameters.db_nm",
+								"type": "Expression"
+							},
+							"table_nm": {
+								"value": "@endswith(pipeline().parameters.table_name,'_bharath')",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					]
+				}
+			}
+		],
+		"parameters": {
+			"db_nm": {
+				"type": "string",
+				"defaultValue": "STG"
+			},
+			"table_name": {
+				"type": "string",
+				"defaultValue": "CUSTOMER_bharath"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-05-05T14:03:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

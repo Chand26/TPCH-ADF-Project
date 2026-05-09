@@ -1,0 +1,127 @@
+{
+	"name": "pl_join_bhoomika",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT\na.REGIONKEY,\na.NAME as NAME,\nb.NAME as REGION_NAME,\na.NATIONKEY,\ncurrent_date as INSERT_DATE\nFROM\nNATION_bhoomika as a\nINNER JOIN\nREGION_sathwik as b\nON a.REGIONKEY = b.REGIONKEY",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NATIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NATIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REGIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "REGIONKEY",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "REGION_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "REGION_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INSERT_DATE",
+									"type": "Date",
+									"physicalType": "date"
+								},
+								"sink": {
+									"name": "INSERT_DATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_sqlserver_bhoomika",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "dbo",
+							"TABLE": "NATION_REGION_DUPLICATE_bhoomika"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_sqlserver_bhoomika",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "dbo",
+							"TABLE": "NATION_REGION_DUPLICATE_bhoomika"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-04-19T04:12:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

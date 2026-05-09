@@ -1,0 +1,15 @@
+{
+	"name": "Data-Engineering-2026",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Enabled",
+			"editable": true
+		}
+	},
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "e27ce447-e188-481a-94c1-000cb6cfe094",
+		"tenantId": "76376f66-abed-4cea-b18f-5139502582a3"
+	}
+}

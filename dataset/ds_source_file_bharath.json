@@ -1,0 +1,38 @@
+{
+	"name": "ds_source_file_bharath",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_blob_bharath",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"src_dir": {
+				"type": "string"
+			},
+			"file_nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().file_nm",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().src_dir",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

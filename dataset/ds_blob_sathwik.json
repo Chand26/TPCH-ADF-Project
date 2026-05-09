@@ -1,0 +1,48 @@
+{
+	"name": "ds_blob_sathwik",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_blob_sathwik",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Folder_name": {
+				"type": "string",
+				"defaultValue": "project"
+			},
+			"File_name": {
+				"type": "string",
+				"defaultValue": "customer.txt"
+			}
+		},
+		"folder": {
+			"name": "adf2026"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().File_name",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().Folder_name",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "CUSTKEY|NAME|ADDRESS|NATIONKEY|PHONE|ACCTBAL|MKTSEGMENT|COMMENT",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
