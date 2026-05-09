@@ -1,0 +1,97 @@
+{
+	"name": "dataflow_redappa",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_blob_chandana",
+						"type": "DatasetReference"
+					},
+					"name": "sourceNation"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_blob_chandana",
+						"type": "DatasetReference"
+					},
+					"name": "sourceRegion"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sqlserver_chandana",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinNationRegion"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          NATIONKEY as short,",
+				"          NAME as string,",
+				"          REGIONKEY as short,",
+				"          COMMENT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceNation",
+				"source(output(",
+				"          REGIONKEY as short,",
+				"          NAME as string,",
+				"          COMMENT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceRegion",
+				"sourceNation, sourceRegion join(sourceNation@REGIONKEY == sourceRegion@REGIONKEY,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinNationRegion",
+				"joinNationRegion select(mapColumn(",
+				"          NATIONKEY,",
+				"          NAME = sourceNation@NAME,",
+				"          REGIONKEY = sourceNation@REGIONKEY,",
+				"          REGION_NAME = sourceRegion@NAME",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(INSERT_DATE = currentDate()) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CUSTKEY as integer,",
+				"          NAME as string,",
+				"          ADDRESS as string,",
+				"          NATIONKEY as integer,",
+				"          PHONE as string,",
+				"          ACCTBAL as decimal(15,2),",
+				"          MKTSEGMENT as string,",
+				"          COMMENT as string,",
+				"          INSERT_DATE as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
